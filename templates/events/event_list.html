@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Lista Wydarzeń{% endblock %}
+
+{% block content %}
+<section class="events-section">
+    <div class="section-header">
+        <h2 class="section-title">Wszystkie Wydarzenia</h2>
+        
+        <!-- Filtry i wyszukiwanie -->
+        <div class="filters-container">
+            <form method="get" class="filter-form styled-form">
+                <div class="filter-grid">
+                    <div class="form-group">
+                        <div class="search-wrapper">
+                            <input type="text" name="search" placeholder="Szukaj wydarzeń..."
+                                   value="{{ request.GET.search }}" class="form-control search-input">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <select name="category" class="form-control" onchange="this.form.submit()">
+                            <option value="">Wszystkie kategorie</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}"
+                                    {% if request.GET.category == category.id|stringformat:"i" %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <select name="sort" class="form-control" onchange="this.form.submit()">
+                            <option value="-start_date" {% if request.GET.sort == '-start_date' %}selected{% endif %}>
+                                Najnowsze
+                            </option>
+                            <option value="start_date" {% if request.GET.sort == 'start_date' %}selected{% endif %}>
+                                Najstarsze
+                            </option>
+                            <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>
+                                Alfabetycznie
+                            </option>
+                            <option value="-participants_count" {% if request.GET.sort == '-participants_count' %}selected{% endif %}>
+                                Najpopularniejsze
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary filter-btn">Filtruj</button>
+                        <a href="{% url 'event-list' %}" class="btn btn-secondary reset-btn">Wyczyść</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista wydarzeń -->
+    <div class="events-grid" id="events-grid">
+        {% for event in events %}
+        <article class="event-card" data-event-id="{{ event.id }}">
+            <div class="event-header">
+                {% if event.category %}
+                <span class="event-category" style="background-color: {{ event.category.color }}">
+                    {{ event.category.name }}
+                </span>
+                {% endif %}
+                <span class="event-status {{ event.status }}">{{ event.get_status_display }}</span>
+            </div>
+            
+            <div class="event-content">
+                <h3 class="event-title">
+                    <a href="{% url 'event-detail' event.pk %}">{{ event.title }}</a>
+                </h3>
+                
+                <p class="event-meta">
+                    <span class="event-date">{{ event.start_date|date:"d.m.Y H:i" }}</span>
+                    <span class="event-location">{{ event.location }}</span>
+                </p>
+                
+                <p class="event-description">{{ event.short_description|truncatewords:20 }}</p>
+                
+                <div class="event-stats">
+                    <span class="participants">
+                        👥 {{ event.participants.count }}{% if event.max_participants > 0 %}/{{ event.max_participants }}{% endif %}
+                    </span>
+                    <span class="organizer">Organizator: {{ event.organizer.username }}</span>
+                </div>
+            </div>
+
+            <div class="event-actions">
+                <a href="{% url 'event-detail' event.pk %}" class="btn btn-primary">Szczegóły</a>
+            </div>
+        </article>
+        {% empty %}
+        <div class="no-events">
+            <p>Brak wydarzeń spełniających kryteria.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Paginacja -->
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+           class="btn">« Pierwsza</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+           class="btn">‹ Poprzednia</a>
+        {% endif %}
+        
+        <span class="current-page">Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}</span>
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+           class="btn">Następna ›</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+           class="btn">Ostatnia »</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

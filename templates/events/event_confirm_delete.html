@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Usuń wydarzenie{% endblock %}
+
+{% block content %}
+<div class="delete-confirmation">
+    <div class="confirmation-header">
+        <h2>Potwierdzenie usunięcia</h2>
+    </div>
+
+    <div class="confirmation-content">
+        <div class="warning-message">
+            <h3>Czy na pewno chcesz usunąć to wydarzenie?</h3>
+            <p>Ta operacja jest nieodwracalna. Wszystkie dane związane z wydarzeniem zostaną trwale usunięte.</p>
+        </div>
+
+        <div class="event-preview">
+            <h4>Wydarzenie do usunięcia:</h4>
+            <div class="event-details">
+                <strong>{{ event.title }}</strong>
+                <p>{{ event.start_date|date:"d.m.Y H:i" }} - {{ event.location }}</p>
+                <p>{{ event.short_description }}</p>
+            </div>
+        </div>
+
+        <form method="POST" class="confirmation-form">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">Tak, usuń wydarzenie</button>
+                <a href="{% url 'event-detail' event.pk %}" class="btn btn-secondary">Anuluj</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

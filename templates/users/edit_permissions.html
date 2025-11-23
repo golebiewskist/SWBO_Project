@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Edycja uprawnień{% endblock %}
+
+{% block content %}
+<div class="edit-permissions-container">
+    <div class="page-header">
+        <h2>Edycja uprawnień użytkownika</h2>
+        <p><strong>Użytkownik:</strong> {{ user.username }}</p>
+    </div>
+
+    <div class="permissions-form">
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h3>Uprawnienia do wydarzeń</h3>
+                <div class="form-group checkbox-group">
+                    {{ form.can_create_events }}
+                    <label for="{{ form.can_create_events.id_for_label }}">
+                        Użytkownik może tworzyć wydarzenia
+                    </label>
+                    {% if form.can_create_events.errors %}
+                    <div class="error-text">{{ form.can_create_events.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="permissions-info">
+                    <h4>Co oznacza to uprawnienie?</h4>
+                    <ul>
+                        <li>Tworzenie nowych wydarzeń</li>
+                        <li>Edycja własnych wydarzeń</li>
+                        <li>Usuwanie własnych wydarzeń</li>
+                        <li>Zarządzanie załącznikami do wydarzeń</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                <a href="{% url 'user-management' %}" class="btn btn-secondary">Anuluj</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

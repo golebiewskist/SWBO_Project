@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Zarządzanie użytkownikami{% endblock %}
+
+{% block content %}
+<div class="user-management-container">
+    <div class="page-header">
+        <h2>Zarządzanie użytkownikami</h2>
+        <p>Tylko superuser może zarządzać uprawnieniami do tworzenia wydarzeń</p>
+    </div>
+
+    <div class="management-stats">
+        <div class="stat-card">
+            <h3>{{ users.count }}</h3>
+            <p>Wszyscy użytkownicy</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ users|length|add:"-1" }}</h3>
+            <p>Użytkownicy niebędący superuserami</p>
+        </div>
+        <div class="stat-card">
+            <h3>{{ users|length|add:"-1" }}</h3>
+            <p>Aktywni użytkownicy</p>
+        </div>
+    </div>
+
+    <div class="users-table-container">
+        <table class="users-table responsive-table">
+            <thead>
+                <tr>
+                    <th>Nazwa użytkownika</th>
+                    <th>Email</th>
+                    <th>Imię i nazwisko</th>
+                    <th>Data dołączenia</th>
+                    <th>Status</th>
+                    <th>Uprawnienia wydarzeń</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_obj in users %}
+                <tr>
+                    <td>
+                        <strong>{{ user_obj.username }}</strong>
+                        {% if user_obj.is_superuser %}
+                        <span class="badge badge-admin">Superuser</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ user_obj.email }}</td>
+                    <td>{{ user_obj.first_name }} {{ user_obj.last_name }}</td>
+                    <td>{{ user_obj.date_joined|date:"d.m.Y H:i" }}</td>
+                    <td>
+                        {% if user_obj.is_active %}
+                        <span class="badge badge-success">Aktywny</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Nieaktywny</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user_obj.is_superuser %}
+                        <span class="badge badge-admin">Superuser</span>
+                        {% elif user_obj.userprofile.can_create_events %}
+                        <span class="badge badge-success">Tak</span>
+                        {% else %}
+                        <span class="badge badge-secondary">Nie</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not user_obj.is_superuser %}
+                        <div class="action-buttons">
+                            <form method="POST" action="{% url 'toggle-event-permission' user_obj.id %}" class="inline-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm {% if user_obj.userprofile.can_create_events %}btn-warning{% else %}btn-success{% endif %}">
+                                    {% if user_obj.userprofile.can_create_events %}❌ Cofnij{% else %}✅ Przyznaj{% endif %}
+                                </button>
+                            </form>
+                            <a href="{% url 'edit-user-permissions' user_obj.id %}" class="btn btn-sm btn-info">✏️ Edytuj</a>
+                        </div>
+                        {% else %}
+                        <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edycja wydarzenia{% else %}Nowe wydarzenie{% endif %}{% endblock %}
+
+{% block content %}
+<div class="event-form-container">
+    <div class="form-header">
+        <h2>{% if form.instance.pk %}Edytuj wydarzenie{% else %}Utwórz nowe wydarzenie{% endif %}</h2>
+        <p>Wypełnij poniższe informacje, aby {% if form.instance.pk %}zaktualizować{% else %}utworzyć{% endif %} wydarzenie</p>
+
+        {% if not categories_exist %}
+        <div class="alert alert-warning">
+            <strong>Uwaga:</strong> Brak kategorii w systemie.
+            {% if user.is_superuser %}
+            <a href="/admin/events/category/add/" target="_blank">Dodaj kategorie przez panel administracyjny</a>
+            {% else %}
+            Skontaktuj się z administratorem, aby dodał kategorie.
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="event-form">
+        {% csrf_token %}
+
+        <div class="form-section">
+            <h3>Podstawowe informacje</h3>
+
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Tytuł wydarzenia *</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <div class="error-text">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.short_description.id_for_label }}">Krótki opis *</label>
+                {{ form.short_description }}
+                <small>Krótki opis wyświetlany na liście wydarzeń (max 500 znaków)</small>
+                {% if form.short_description.errors %}
+                <div class="error-text">{{ form.short_description.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Pełny opis *</label>
+                {{ form.description }}
+                <small>Szczegółowy opis wydarzenia</small>
+                {% if form.description.errors %}
+                <div class="error-text">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Szczegóły wydarzenia</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.start_date.id_for_label }}">Data rozpoczęcia *</label>
+                    {{ form.start_date }}
+                    {% if form.start_date.errors %}
+                    <div class="error-text">{{ form.start_date.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.end_date.id_for_label }}">Data zakończenia *</label>
+                    {{ form.end_date }}
+                    {% if form.end_date.errors %}
+                    <div class="error-text">{{ form.end_date.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.location.id_for_label }}">Miejsce wydarzenia *</label>
+                {{ form.location }}
+                {% if form.location.errors %}
+                <div class="error-text">{{ form.location.errors }}</div>
+                {% endif %}
+            </div>
+
+            {% if form.category %}
+            <div class="form-group">
+                <label for="{{ form.category.id_for_label }}">Kategoria</label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                <div class="error-text">{{ form.category.errors }}</div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-section">
+            <h3>Ograniczenia i status</h3>
+            
+            <div class="form-group">
+                <label for="{{ form.max_participants.id_for_label }}">Maksymalna liczba uczestników</label>
+                {{ form.max_participants }}
+                <small>Pozostaw 0 dla nieograniczonej liczby uczestników</small>
+                {% if form.max_participants.errors %}
+                <div class="error-text">{{ form.max_participants.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">Status wydarzenia</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                <div class="error-text">{{ form.status.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                {% if form.instance.pk %}Zaktualizuj wydarzenie{% else %}Utwórz wydarzenie{% endif %}
+            </button>
+            <a href="{% if form.instance.pk %}{% url 'event-detail' form.instance.pk %}{% else %}{% url 'event-list' %}{% endif %}" 
+               class="btn btn-secondary">Anuluj</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

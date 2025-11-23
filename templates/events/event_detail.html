@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="event-detail-container">
+    <!-- Nagłówek wydarzenia -->
+    <div class="event-header">
+        <div class="event-meta">
+            {% if event.category %}
+            <span class="event-category" style="background-color: {{ event.category.color }};">
+                {{ event.category.name }}
+            </span>
+            {% endif %}
+            <span class="event-status {{ event.status }}">{{ event.get_status_display }}</span>
+        </div>
+        <h1>{{ event.title }}</h1>
+        <div class="event-dates">
+            <span class="event-date">{{ event.start_date|date:"d.m.Y H:i" }} - {{ event.end_date|date:"d.m.Y H:i" }}</span>
+        </div>
+        <div class="event-location">
+            {{ event.location }}
+        </div>
+    </div>
+
+    <div class="event-detail-content">
+        <div class="event-main">
+            <!-- Opis wydarzenia -->
+            <section class="event-description-section">
+                <h2>Opis wydarzenia</h2>
+                <p>{{ event.description|linebreaks }}</p>
+            </section>
+
+            <!-- Uczestnicy -->
+            <section class="event-participants-section">
+                <h2>Uczestnicy ({{ event.participants.count }}{% if event.max_participants > 0 %}/{{ event.max_participants }}{% endif %})</h2>
+                {% if event.participants.all %}
+                <div class="participants-list">
+                    {% for participant in event.participants.all %}
+                    <span class="participant">{{ participant.username }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>Brak uczestników.</p>
+                {% endif %}
+            </section>
+
+            <!-- Komentarze -->
+            <section class="event-comments-section">
+                <h2>Komentarze ({{ event.comments.count }})</h2>
+                {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'add-comment' event.pk %}" class="comment-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea name="content" rows="3" placeholder="Dodaj komentarz..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Dodaj komentarz</button>
+                </form>
+                {% endif %}
+
+                <div class="comments-list">
+                    {% for comment in event.comments.all %}
+                    <div class="comment">
+                        <div class="comment-header">
+                            <strong>{{ comment.author.username }}</strong>
+                            <span class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        <div class="comment-content">
+                            {{ comment.content|linebreaks }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>Brak komentarzy.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+
+        <div class="event-sidebar">
+            <!-- Informacje organizatora -->
+            <div class="event-organizer">
+                <h3>Organizator</h3>
+                <p>{{ event.organizer.username }}</p>
+            </div>
+
+            <!-- Akcje -->
+            <div class="event-actions">
+                {% if user.is_authenticated %}
+                    {% if user == event.organizer %}
+                    <a href="{% url 'event-update' event.pk %}" class="btn btn-primary">Edytuj wydarzenie</a>
+                    <a href="{% url 'event-delete' event.pk %}" class="btn btn-danger">Usuń wydarzenie</a>
+                    {% else %}
+                    <form method="POST" action="{% url 'event-participate' event.pk %}">
+                        {% csrf_token %}
+                        {% if is_participating %}
+                        <button type="submit" class="btn btn-danger btn-block">Wypisz się</button>
+                        {% else %}
+                        <button type="submit" class="btn btn-success btn-block">Dołącz</button>
+                        {% endif %}
+                    </form>
+                    {% endif %}
+                {% else %}
+                <p><a href="{% url 'login' %}">Zaloguj się</a>, aby dołączyć do wydarzenia.</p>
+                {% endif %}
+            </div>
+
+            {% if event.attachments.all or user == event.organizer %}
+            <div class="event-attachments card">
+                <h3>Załączniki ({{ event.attachments.count }})</h3>
+
+                {% if event.attachments.all %}
+                <div class="attachments-list">
+                    {% for attachment in event.attachments.all %}
+                    <div class="attachment-item">
+                        <a href="{{ attachment.file.url }}" target="_blank" class="attachment-link">
+                            📎 {{ attachment.name }}
+                        </a>
+                        <small>Dodano: {{ attachment.uploaded_at|date:"d.m.Y H:i" }}</small>
+                        {% if user == event.organizer %}
+                        <a href="{% url 'delete-attachment' attachment.pk %}" class="btn btn-sm btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć ten załącznik?')">Usuń</a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Dodawanie załączników (tylko organizator) -->
+                {% if user == event.organizer %}
+                <div class="add-attachment">
+                    <h4>Dodaj załącznik</h4>
+                    <form method="POST" action="{% url 'add-attachment' event.pk %}" enctype="multipart/form-data" class="attachment-form">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" name="name" placeholder="Nazwa załącznika" required class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <input type="file" name="file" required class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Dodaj załącznik</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

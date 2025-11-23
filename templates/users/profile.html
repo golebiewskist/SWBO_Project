@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profil{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-form profile-form-container">
+        <div class="profile-header">
+            <h2>Mój profil</h2>
+            <div class="profile-badges">
+                {% if user.userprofile.can_create_events %}
+                <span class="badge badge-success">Może tworzyć wydarzenia</span>
+                {% else %}
+                <span class="badge badge-secondary">Brak uprawnień do tworzenia wydarzeń</span>
+                {% endif %}
+
+                {% if user.is_superuser %}
+                <span class="badge badge-admin">Superuser</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <form method="POST" class="styled-form">
+            {% csrf_token %}
+
+            <div class="form-section">
+                <h3>Dane podstawowe</h3>
+                <div class="form-group">
+                    <label for="username">Nazwa użytkownika:</label>
+                    <input type="text" name="username" id="username" class="form-control" value="{{ user_form.username.value|default:user.username }}" required>
+                    {% if user_form.username.errors %}
+                    <div class="error-text">{{ user_form.username.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first_name">Imię:</label>
+                        <input type="text" name="first_name" id="first_name" class="form-control" value="{{ user_form.first_name.value|default:user.first_name }}" required>
+                        {% if user_form.first_name.errors %}
+                        <div class="error-text">{{ user_form.first_name.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">Nazwisko:</label>
+                        <input type="text" name="last_name" id="last_name" class="form-control" value="{{ user_form.last_name.value|default:user.last_name }}" required>
+                        {% if user_form.last_name.errors %}
+                        <div class="error-text">{{ user_form.last_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" name="email" id="email" class="form-control" value="{{ user_form.email.value|default:user.email }}" required>
+                    {% if user_form.email.errors %}
+                    <div class="error-text">{{ user_form.email.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Dodatkowe informacje</h3>
+                <div class="form-group">
+                    <label for="bio">O sobie:</label>
+                    <textarea name="bio" id="bio" class="form-control" rows="4" placeholder="Opisz siebie...">{{ profile_form.bio.value|default:user.userprofile.bio }}</textarea>
+                    {% if profile_form.bio.errors %}
+                    <div class="error-text">{{ profile_form.bio.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Telefon:</label>
+                    <input type="text" name="phone" id="phone" class="form-control" value="{{ profile_form.phone.value|default:user.userprofile.phone }}" placeholder="+48 123 456 789">
+                    {% if profile_form.phone.errors %}
+                    <div class="error-text">{{ profile_form.phone.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Aktualizuj profil</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
