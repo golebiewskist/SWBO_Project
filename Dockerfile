@@ -1,10 +1,14 @@
 # Stage 1: Base build stage
 FROM python:3.13-slim AS builder
 
+# Install system dependencies for building Python packages
+RUN apt-get update && apt-get install -y \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 # Create the app directory
 RUN mkdir /app
-
-# Set the working directory
 WORKDIR /app
 
 # Set environment variables to optimize Python
@@ -23,6 +27,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Stage 2: Production stage
 FROM python:3.13-slim
 
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN useradd -m -r appuser && \
    mkdir /app && \
    chown -R appuser /app
@@ -34,21 +43,23 @@ COPY --from=builder /usr/local/bin/ /usr/local/bin/
 # Set the working directory
 WORKDIR /app
 
-# Copy application code
+# Copy application code and start script
 COPY --chown=appuser:appuser . .
+COPY --chown=appuser:appuser start.sh /app/start.sh
 
 # Set environment variables to optimize Python
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV PORT=8000
 
 # Switch to non-root user
 USER appuser
 
+# Make start script executable
+RUN chmod +x /app/start.sh
+
 # Expose the application port
 EXPOSE 8000
 
-# Doing migrations
-CMD ["python", "manage.py", "migrate"]
-
-# Start the application using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "SWBO_Project.wsgi:application"]
+# Use the start script
+CMD ["./start.sh"]
