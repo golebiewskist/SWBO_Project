@@ -4,7 +4,7 @@
 {% block title %}{% if form.instance.pk %}Edycja wydarzenia{% else %}Nowe wydarzenie{% endif %}{% endblock %}
 
 {% block content %}
-<div class="event-form-container">
+<section class="event-form-container">
     <div class="form-header">
         <h2>{% if form.instance.pk %}Edytuj wydarzenie{% else %}Utwórz nowe wydarzenie{% endif %}</h2>
         <p>Wypełnij poniższe informacje, aby {% if form.instance.pk %}zaktualizować{% else %}utworzyć{% endif %} wydarzenie</p>
@@ -123,5 +123,5 @@
                class="btn btn-secondary">Anuluj</a>
         </div>
     </form>
-</div>
+</section>
 {% endblock %}

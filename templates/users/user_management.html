@@ -4,7 +4,7 @@
 {% block title %}Zarządzanie użytkownikami{% endblock %}
 
 {% block content %}
-<div class="user-management-container">
+<section class="user-management-container">
     <div class="page-header">
         <h2>Zarządzanie użytkownikami</h2>
         <p>Tylko superuser może zarządzać uprawnieniami do tworzenia wydarzeń</p>
@@ -72,10 +72,10 @@
                             <form method="POST" action="{% url 'toggle-event-permission' user_obj.id %}" class="inline-form">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-sm {% if user_obj.userprofile.can_create_events %}btn-warning{% else %}btn-success{% endif %}">
-                                    {% if user_obj.userprofile.can_create_events %}❌ Cofnij{% else %}✅ Przyznaj{% endif %}
+                                    {% if user_obj.userprofile.can_create_events %}Cofnij{% else %}Przyznaj{% endif %}
                                 </button>
                             </form>
-                            <a href="{% url 'edit-user-permissions' user_obj.id %}" class="btn btn-sm btn-info">✏️ Edytuj</a>
+                            <a href="{% url 'edit-user-permissions' user_obj.id %}" class="btn btn-sm btn-info">Edytuj</a>
                         </div>
                         {% else %}
                         <span class="text-muted">-</span>
@@ -86,5 +86,5 @@
             </tbody>
         </table>
     </div>
-</div>
+</section>
 {% endblock %}
