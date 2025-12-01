@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count
 from .models import Event, Category, Participation, EventAttachment
 from .forms import EventForm, CommentForm, AttachmentForm
 
@@ -30,9 +30,21 @@ class EventListView(ListView):
                 Q(location__icontains=search)
             )
 
+        # ANNOTATE: Obliczanie liczby uczestników dla KAŻDEGO zapytania
+        # Używamy distinct=True dla bezpieczeństwa na wypadek zduplikowanych wierszy
+        queryset = queryset.annotate(participants_count=Count('participants', distinct=True))
+
         # Sortowanie
         sort = self.request.GET.get('sort', '-start_date')
-        queryset = queryset.order_by(sort)
+
+        # Lista bezpiecznych pól do sortowania (w tym nowe participants_count)
+        valid_sort_fields = ['title', 'start_date', 'end_date', 'created_at', 'participants_count']
+
+        if sort.lstrip('-') in valid_sort_fields:  # lstrip('-') usuwa minus
+            queryset = queryset.order_by(sort)
+        else:
+            # Domyślne sortowanie, jeśli podano nieprawidłowe pole
+            queryset = queryset.order_by('-start_date')
 
         return queryset
 
