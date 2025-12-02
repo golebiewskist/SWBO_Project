@@ -25,58 +25,6 @@
     </div>
 
     <div class="event-detail-content">
-        <div class="event-main">
-            <!-- Opis wydarzenia -->
-            <section class="event-description-section">
-                <h2>Opis wydarzenia</h2>
-                <p>{{ event.description|linebreaks }}</p>
-            </section>
-
-            <!-- Uczestnicy -->
-            <section class="event-participants-section">
-                <h2>Uczestnicy ({{ event.participants.count }}{% if event.max_participants > 0 %}/{{ event.max_participants }}{% endif %})</h2>
-                {% if event.participants.all %}
-                <div class="participants-list">
-                    {% for participant in event.participants.all %}
-                    <span class="participant">{{ participant.username }}</span>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p>Brak uczestników.</p>
-                {% endif %}
-            </section>
-
-            <!-- Komentarze -->
-            <section class="event-comments-section">
-                <h2>Komentarze ({{ event.comments.count }})</h2>
-                {% if user.is_authenticated %}
-                <form method="POST" action="{% url 'add-comment' event.pk %}" class="comment-form">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <textarea name="content" rows="3" placeholder="Dodaj komentarz..." required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Dodaj komentarz</button>
-                </form>
-                {% endif %}
-
-                <div class="comments-list">
-                    {% for comment in event.comments.all %}
-                    <div class="comment">
-                        <div class="comment-header">
-                            <strong>{{ comment.author.username }}</strong>
-                            <span class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
-                        </div>
-                        <div class="comment-content">
-                            {{ comment.content|linebreaks }}
-                        </div>
-                    </div>
-                    {% empty %}
-                    <p>Brak komentarzy.</p>
-                    {% endfor %}
-                </div>
-            </section>
-        </div>
-
         <div class="event-sidebar">
             <!-- Informacje organizatora -->
             <div class="event-organizer">
@@ -143,6 +91,57 @@
                 {% endif %}
             </div>
             {% endif %}
+        </div>
+        <div class="event-main">
+            <!-- Opis wydarzenia -->
+            <section class="event-description-section">
+                <h2>Opis wydarzenia</h2>
+                <p>{{ event.description|linebreaks }}</p>
+            </section>
+
+            <!-- Uczestnicy -->
+            <section class="event-participants-section">
+                <h2>Uczestnicy ({{ event.participants.count }}{% if event.max_participants > 0 %}/{{ event.max_participants }}{% endif %})</h2>
+                {% if event.participants.all %}
+                <div class="participants-list">
+                    {% for participant in event.participants.all %}
+                    <span class="participant">{{ participant.username }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>Brak uczestników.</p>
+                {% endif %}
+            </section>
+
+            <!-- Komentarze -->
+            <section class="event-comments-section">
+                <h2>Komentarze ({{ event.comments.count }})</h2>
+                {% if user.is_authenticated %}
+                <form method="POST" action="{% url 'add-comment' event.pk %}" class="comment-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <textarea name="content" rows="3" placeholder="Dodaj komentarz..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Dodaj komentarz</button>
+                </form>
+                {% endif %}
+
+                <div class="comments-list">
+                    {% for comment in event.comments.all %}
+                    <div class="comment">
+                        <div class="comment-header">
+                            <strong>{{ comment.author.username }}</strong>
+                            <span class="comment-date">{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        <div class="comment-content">
+                            {{ comment.content|linebreaks }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>Brak komentarzy.</p>
+                    {% endfor %}
+                </div>
+            </section>
         </div>
     </div>
 </div>
